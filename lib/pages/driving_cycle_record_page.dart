@@ -19,7 +19,6 @@ class _DrivingCycleRecordPageState extends State<DrivingCycleRecordPage> {
   StreamSubscription<Position> _positionStreamSubscription;
 
   final TextEditingController _hostTextController = TextEditingController();
-  final TextEditingController _messageTextController = TextEditingController();
   final TextEditingController _topicTextController = TextEditingController();
 
   final TextEditingController _drivingCycleNameTextController =
@@ -54,8 +53,10 @@ class _DrivingCycleRecordPageState extends State<DrivingCycleRecordPage> {
     }
 
     _hostTextController.dispose();
-    _messageTextController.dispose();
     _topicTextController.dispose();
+
+    _drivingCycleNameTextController.dispose();
+    _drivingCycleDecriptionTextController.dispose();
 
     super.dispose();
   }
@@ -69,27 +70,13 @@ class _DrivingCycleRecordPageState extends State<DrivingCycleRecordPage> {
         Provider.of<GeolocatorAppStreamState>(context);
     currentGeolocationState = geoState;
     return _buildMainListView();
-/*     return FutureBuilder<GeolocationStatus>(
-        future: Geolocator().checkGeolocationPermissionStatus(),
-        builder:
-            (BuildContext context, AsyncSnapshot<GeolocationStatus> snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.data == GeolocationStatus.denied) {
-            return const PlaceholderWidget('Location services disabled',
-                'Enable location services for this App using the device settings.');
-          }
-          return _buildColumn();
-        }); */
   }
 
   Widget _buildMainListView() {
     return ListView(
       children: <Widget>[
         SizedBox(
-          height: 10.0,
+          height: 30.0,
         ),
         _buildAWSIOTColumn(),
         _buildGeolocatorColumn(),
@@ -105,7 +92,6 @@ class _DrivingCycleRecordPageState extends State<DrivingCycleRecordPage> {
           _buildConnectionStateText(_prepareAWSIOTStateMessageFrom(
               currentAWSIOTState.getAppConnectionState)),
           _buildEditableColumn(),
-          //_buildScrollableTextWith(currentAppState.getHistoryText)
         ],
       ),
     );
@@ -157,10 +143,7 @@ class _DrivingCycleRecordPageState extends State<DrivingCycleRecordPage> {
   Widget _buildTextFieldWith(TextEditingController controller, String hintText,
       MQTTAppConnectionState state) {
     bool shouldEnable = false;
-    if (controller == _messageTextController &&
-        state == MQTTAppConnectionState.connected) {
-      shouldEnable = true;
-    } else if ((controller == _hostTextController &&
+    if ((controller == _hostTextController &&
             state == MQTTAppConnectionState.disconnected) ||
         (controller == _topicTextController &&
             state == MQTTAppConnectionState.disconnected)) {
@@ -222,7 +205,6 @@ class _DrivingCycleRecordPageState extends State<DrivingCycleRecordPage> {
   void _publishMessage(String text) {
     final String message = text;
     awsIOTmanager.publish(message);
-    _messageTextController.clear();
   }
 
   /// *****************************************华丽的分割线**************************************************** */
